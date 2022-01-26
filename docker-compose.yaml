@@ -1,0 +1,50 @@
+version: '3.8'
+services:
+  jenkins:
+    container_name: jenkins
+    build: jenkins-ansible
+    image: jenkins-ansible
+    privileged: true
+    user: root
+    ports:
+      - "8080:8080"
+    volumes:
+      - "$PWD/jenkins-ansible/jenkins-data:/var/jenkins_home"
+      - "/var/run/docker.sock:/var/run/docker.sock"
+    networks:
+      - net
+  remote_host:
+    container_name: remote_host
+    build: centos
+    image: remote-host
+    volumes:
+      - "$PWD/centos/centos-data:/sys/fs/cgroup"
+    networks:
+      - net
+  db_host:
+    container_name: db_host
+    image: mysql
+    command: --default-authentication-plugin=mysql_native_password
+    ports:
+      - "3306:3306"
+    volumes:
+      - "$PWD/mysql/db-data:/var/lib/mysql"
+    environment:
+      - "MYSQL_ROOT_PASSWORD=password"
+    networks:
+      - net
+  # git_server:
+  #   container_name: git_server
+  #   image: gitlab/gitlab-ce
+  #   hostname: gitlab.example.com
+  #   ports:
+  #     - "8090:80"
+  #   volumes:
+  #     - "$GITLAB_HOME/config:/etc/gitlab"
+  #     - "$GITLAB_HOME/logs:/var/log/gitlab"
+  #     - "$GITLAB_HOME/data:/var/opt/gitlab"
+  #   networks:
+  #     - net
+
+networks:
+  net:
